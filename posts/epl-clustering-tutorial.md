@@ -21,8 +21,8 @@ Before clustering anything, we need verified standings. The initial version of t
 The data pipeline lives in `fetch_standings.py`. Run it once before anything else:
 
 ```bash
-python3 fetch_standings.py   # writes data/standings_verified.json
-python3 generate.py          # reads that file, writes index.html
+python fetch_standings.py   # writes data/standings_verified.json
+python generate.py          # reads that file, writes index.html
 ```
 
 Two sources cover the full 35-season range:
@@ -241,7 +241,7 @@ The departed regulars and the yo-yo regulars have similar `first_season` average
 The companion script `generate_trajectories.py` takes the cluster assignments and produces a self-contained HTML file — `trajectories.html` — showing each club as a sparkline grouped by cluster. The y-axis is league position (1 at the top, 20 at the bottom); gaps in the line are absent seasons; a filled dot marks the last known season.
 
 ```python
-python3 generate_trajectories.py
+python generate_trajectories.py
 # → trajectories.html
 ```
 
