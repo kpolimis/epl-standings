@@ -399,7 +399,7 @@ const EPL = {"seasons":["1991/92 (First Div.)","1992/93","1993/94","1994/95","19
     const best=vis.reduce((a,b)=>a.p<b.p?a:b);
     const ttls=vis.filter(d=>d.p===1).map(d=>d.s);
     let h=`<strong style="color:${info.color}">${name}</strong>`;
-    h+=`${cur.s}: <b>P${cur.p}</b><br>${vis.length} EPL seasons`;
+    h+=`${cur.s}: <b>P${cur.p}</b><br>${vis.filter(d=>!d.s.includes("First Div")).length} EPL seasons`;
     if (ttls.length) h+=`<br>🏆 ${ttls.join(", ")}`;
     h+=`<br>Best: P${best.p} (${best.s})`;
     tip.innerHTML=h; tip.style.display="block"; moveTip(ev);
