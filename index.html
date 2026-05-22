@@ -78,7 +78,7 @@ footer a{color:#58a6ff;text-decoration:none}
 <header>
   <div>
     <h1>Premier League — <span>Every Season</span></h1>
-    <p class="subtitle">1991/92 (pre-EPL) → 2025/26 · one season at a time</p>
+    <p class="subtitle">34 Premier League seasons · 1992/93 – 2025/26  (+ 1991/92 First Division context)</p>
   </div>
 </header>
 <div id="banner">
@@ -140,6 +140,7 @@ const EPL = {"seasons":["1991/92 (First Div.)","1992/93","1993/94","1994/95","19
   });
 
   let frame=0, playing=false, speed=750, timer=null, selectedTeam=null;
+  document.getElementById('slider').max = N - 1;
 
   // ── Dimensions ───────────────────────────────────────────────
   const TW=1380, TH=760, M={t:70,r:200,b:68,l:46};
