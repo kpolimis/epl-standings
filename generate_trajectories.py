@@ -184,7 +184,7 @@ footer a{{color:#58a6ff;text-decoration:none;}}
   k-means (k=4) on: seasons played, first appearance, last appearance, currently in league, number of stints, longest consecutive run.<br>
   Position data from official Premier League records. 2025/26 with one matchweek remaining (May 2026).<br>
   <a href="https://github.com/kpolimis/epl-standings" target="_blank">github.com/kpolimis/epl-standings</a>
-  · <a href="epl-positions.html">← back to full chart</a>
+  · <a href="index.html">← back to full chart</a>
 </footer>
 <script>
 const DATA = {JS_DATA};
