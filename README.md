@@ -40,9 +40,9 @@ git clone https://github.com/kpolimis/epl-standings
 cd epl-standings
 pip install -r requirements.txt      # numpy, scikit-learn (cluster scripts only)
 
-python3 fetch_standings.py           # fetch verified standings → data/standings_verified.json
-python3 generate.py                  # build chart → index.html
-python3 generate_trajectories.py     # build cluster viz → trajectories.html
+python fetch_standings.py           # fetch verified standings → data/standings_verified.json
+python generate.py                  # build chart → index.html
+python generate_trajectories.py     # build cluster viz → trajectories.html
 
 open index.html
 ```
@@ -85,9 +85,9 @@ Standings are fetched from two sources by `fetch_standings.py`:
 Both sources provide raw match results. Final tables are derived identically using points → goal difference → goals scored. To update for a new season:
 
 ```bash
-python3 fetch_standings.py    # re-fetches all seasons including the new one
-python3 generate.py           # rebuilds index.html
-python3 generate_trajectories.py  # rebuilds trajectories.html
+python fetch_standings.py    # re-fetches all seasons including the new one
+python generate.py           # rebuilds index.html
+python generate_trajectories.py  # rebuilds trajectories.html
 ```
 
 ---
