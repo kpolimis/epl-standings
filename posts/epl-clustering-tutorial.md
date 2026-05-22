@@ -8,7 +8,7 @@ tags: [football, python, clustering, data-viz, premier-league]
 
 # Clustering EPL Club Trajectories with k-means
 
-In a [companion post](epl-positions.html) I built an interactive chart showing every Premier League finish for all 52 clubs across 34 seasons. While building it, I noticed that the trajectory lines fell into recognizable shapes — some clubs always present, others flickering in and out, others appearing once and vanishing. The visual pattern suggested a taxonomy. This post is the technical walkthrough of how I formalized it with k-means clustering.
+In a [companion post](epl-positions.md) I built an interactive chart showing every Premier League finish for all 52 clubs across 34 seasons. While building it, I noticed that the trajectory lines fell into recognizable shapes — some clubs always present, others flickering in and out, others appearing once and vanishing. The visual pattern suggested a taxonomy. This post is the technical walkthrough of how I formalized it with k-means clustering.
 
 All code is available in the [project repository](https://github.com/kpolimis/epl-standings). The cluster visualization produced at the end of this post is at [trajectories.html](trajectories.html).
 
