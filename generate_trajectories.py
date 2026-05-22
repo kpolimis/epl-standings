@@ -71,7 +71,7 @@ def cluster_sort_key(c_id):
 
 sorted_cluster_ids = sorted(raw_clusters.keys(), key=cluster_sort_key)
 
-LABELS = ["Permanent fixtures", "Yo-yo regulars", "Modern era entrants", "Departed regulars"]
+LABELS = ["Permanent fixtures", "Yo-yo regulars", "Modern era entrants", "Departed"]
 COLORS = ["#F59E0B", "#3B82F6", "#8B5CF6", "#6B7280"]
 DESCS  = [
     "Present every season, or close to it",
