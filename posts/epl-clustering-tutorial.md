@@ -215,7 +215,7 @@ Cluster — 11 clubs  [Modern era entrants]
            Cardiff City, Huddersfield Town, Hull City, Reading,
            Stoke City, Swansea City, Wigan Athletic
 
-Cluster — 16 clubs  [Departed]
+Cluster — 16 clubs  [EPL tourists]
   avg seasons:    6.6
   avg first idx:  3.5
   currently in:   0%

@@ -1,18 +1,38 @@
+"""Standalone k-means cluster analysis of EPL club trajectories.
+
+Prints a cluster summary and club-level table to stdout.
+Run: python cluster_trajectories.py
+Reads: data/standings.json (produced by generate.py)
+"""
 import json
+import logging
+
 import numpy as np
 from sklearn.cluster import KMeans
 from sklearn.preprocessing import StandardScaler
 
-with open("data/standings.json") as f:
-    d = json.load(f)
+logging.basicConfig(level=logging.INFO, format="%(levelname)s %(message)s")
+logger = logging.getLogger(__name__)
 
-seasons = d["seasons"]
-teams = d["teams"]
-N = len(seasons)  # 35
+N_CLUSTERS: int = 4
+RANDOM_SEED: int = 42
+FEATURE_COLS: list[str] = [
+    "n_seasons", "first_season", "last_season",
+    "currently_in", "stints", "max_consecutive_run",
+]
 
 
-def extract_features(pos):
-    present = [i for i, p in enumerate(pos) if p is not None]
+def extract_features(pos: list[int | None]) -> dict[str, int | float] | None:
+    """Extract scalar clustering features from a club's position history.
+
+    Args:
+        pos: Season-by-season league positions; None when not in the EPL.
+
+    Returns:
+        Dict mapping feature name to value, or None if the club has no
+        top-flight appearances.
+    """
+    present = [idx for idx, p in enumerate(pos) if p is not None]
     if not present:
         return None
 
@@ -21,13 +41,11 @@ def extract_features(pos):
     last_season = present[-1]
     currently_in = 1 if pos[-1] is not None else 0
 
-    # Count distinct stints (gaps in presence)
     stints = 1
     for i in range(1, len(present)):
         if present[i] != present[i - 1] + 1:
             stints += 1
 
-    # Longest consecutive run
     max_run = 1
     run = 1
     for i in range(1, len(present)):
@@ -37,8 +55,7 @@ def extract_features(pos):
         else:
             run = 1
 
-    # Avg position when present (lower number = better)
-    avg_pos = np.mean([p for p in pos if p is not None])
+    avg_pos = float(np.mean([p for p in pos if p is not None]))
 
     return {
         "n_seasons": n_seasons,
@@ -51,80 +68,102 @@ def extract_features(pos):
     }
 
 
-records = []
-for name, t in teams.items():
-    feats = extract_features(t["pos"])
-    if feats:
-        feats["team"] = name
-        records.append(feats)
+def label_cluster(stats: dict[str, float]) -> str:
+    """Assign a human-readable label to a cluster based on aggregate statistics.
 
-feature_cols = ["n_seasons", "first_season", "last_season", "currently_in", "stints", "max_consecutive_run"]
-X = np.array([[r[c] for c in feature_cols] for r in records])
+    Args:
+        stats: Cluster summary containing avg_seasons, pct_current,
+               avg_first, and avg_stints.
 
-scaler = StandardScaler()
-X_scaled = scaler.fit_transform(X)
-
-np.random.seed(42)
-km = KMeans(n_clusters=4, n_init=20, random_state=42)
-labels = km.fit_predict(X_scaled)
-
-for i, r in enumerate(records):
-    r["cluster"] = int(labels[i])
-
-# Label clusters by their dominant characteristics
-cluster_stats = {}
-for c in range(4):
-    members = [r for r in records if r["cluster"] == c]
-    cluster_stats[c] = {
-        "n": len(members),
-        "avg_seasons": np.mean([r["n_seasons"] for r in members]),
-        "avg_first": np.mean([r["first_season"] for r in members]),
-        "avg_last": np.mean([r["last_season"] for r in members]),
-        "pct_current": np.mean([r["currently_in"] for r in members]),
-        "avg_stints": np.mean([r["stints"] for r in members]),
-        "avg_max_run": np.mean([r["max_consecutive_run"] for r in members]),
-        "members": sorted([r["team"] for r in members]),
-    }
-
-# Assign human-readable labels based on cluster characteristics
-def label_cluster(stats):
+    Returns:
+        Descriptive label string for the cluster.
+    """
     if stats["avg_seasons"] > 25 and stats["pct_current"] > 0.8:
         return "Permanent fixtures"
-    elif stats["avg_first"] > 15 and stats["pct_current"] > 0.8:
+    if stats["avg_first"] > 15 and stats["pct_current"] > 0.8:
         return "Late arrivals who stayed"
-    elif stats["avg_stints"] > 1.5 and stats["pct_current"] < 0.5:
+    if stats["avg_stints"] > 1.5 and stats["pct_current"] < 0.5:
         return "Yo-yo clubs (mostly gone)"
-    elif stats["avg_stints"] > 1.3:
+    if stats["avg_stints"] > 1.3:
         return "Yo-yo clubs (some still present)"
-    elif stats["pct_current"] < 0.3 and stats["avg_seasons"] < 10:
-        return "One-time visitors"
-    else:
-        return "Mid-tenure clubs"
+    if stats["pct_current"] < 0.3 and stats["avg_seasons"] < 10:
+        return "EPL tourists"
+    return "Mid-tenure clubs"
 
-for c, s in cluster_stats.items():
-    s["label"] = label_cluster(s)
 
-print("=" * 60)
-print("EPL CLUB TRAJECTORY CLUSTERS")
-print("=" * 60)
+def main() -> None:
+    with open("data/standings.json") as f:
+        data = json.load(f)
 
-for c in sorted(cluster_stats, key=lambda x: -cluster_stats[x]["avg_seasons"]):
-    s = cluster_stats[c]
-    print(f"\nCluster {c}: {s['label']} (n={s['n']})")
-    print(f"  Avg seasons in EPL:   {s['avg_seasons']:.1f}")
-    print(f"  Avg first season idx: {s['avg_first']:.1f}  ({seasons[int(s['avg_first'])] if int(s['avg_first']) < N else 'N/A'})")
-    print(f"  Currently in league:  {s['pct_current']*100:.0f}%")
-    print(f"  Avg stints:           {s['avg_stints']:.2f}")
-    print(f"  Avg longest run:      {s['avg_max_run']:.1f} seasons")
-    print(f"  Teams: {', '.join(s['members'])}")
+    seasons: list[str] = data["seasons"]
+    teams: dict = data["teams"]
+    n_seasons: int = len(seasons)
 
-# Print club-level for blog prose
-print("\n\n" + "=" * 60)
-print("CLUB-LEVEL TABLE (for blog)")
-print("=" * 60)
-print(f"{'Team':<28} {'Seasons':>7} {'Stints':>6} {'Current':>7} {'Cluster Label'}")
-print("-" * 70)
-for r in sorted(records, key=lambda x: (-x["n_seasons"], x["team"])):
-    c = r["cluster"]
-    label = cluster_stats[c]["label"]
-    print(f"{r['team']:<28} {r['n_seasons']:>7} {r['stints']:>6} {'yes' if r['currently_in'] else 'no':>7}  {label}")
+    records: list[dict] = []
+    for team_name, team_data in teams.items():
+        features = extract_features(team_data["pos"])
+        if features:
+            features["team"] = team_name
+            records.append(features)
+
+    X = np.array([[record[col] for col in FEATURE_COLS] for record in records])
+
+    scaler = StandardScaler()
+    X_scaled = scaler.fit_transform(X)
+
+    np.random.seed(RANDOM_SEED)
+    km = KMeans(n_clusters=N_CLUSTERS, n_init=20, random_state=RANDOM_SEED)
+    labels = km.fit_predict(X_scaled)
+
+    for idx, record in enumerate(records):
+        record["cluster"] = int(labels[idx])
+
+    cluster_stats: dict[int, dict] = {}
+    for cluster_id in range(N_CLUSTERS):
+        members = [r for r in records if r["cluster"] == cluster_id]
+        cluster_stats[cluster_id] = {
+            "n": len(members),
+            "avg_seasons": np.mean([r["n_seasons"] for r in members]),
+            "avg_first": np.mean([r["first_season"] for r in members]),
+            "avg_last": np.mean([r["last_season"] for r in members]),
+            "pct_current": np.mean([r["currently_in"] for r in members]),
+            "avg_stints": np.mean([r["stints"] for r in members]),
+            "avg_max_run": np.mean([r["max_consecutive_run"] for r in members]),
+            "members": sorted([r["team"] for r in members]),
+        }
+
+    for cluster_id, stats in cluster_stats.items():
+        stats["label"] = label_cluster(stats)
+
+    logger.info("=" * 60)
+    logger.info("EPL CLUB TRAJECTORY CLUSTERS")
+    logger.info("=" * 60)
+
+    for cluster_id in sorted(cluster_stats, key=lambda x: -cluster_stats[x]["avg_seasons"]):
+        stats = cluster_stats[cluster_id]
+        logger.info("\nCluster %d: %s (n=%d)", cluster_id, stats["label"], stats["n"])
+        logger.info("  Avg seasons in EPL:   %.1f", stats["avg_seasons"])
+        avg_first_idx = int(stats["avg_first"])
+        season_label = seasons[avg_first_idx] if avg_first_idx < n_seasons else "N/A"
+        logger.info("  Avg first season idx: %.1f  (%s)", stats["avg_first"], season_label)
+        logger.info("  Currently in league:  %.0f%%", stats["pct_current"] * 100)
+        logger.info("  Avg stints:           %.2f", stats["avg_stints"])
+        logger.info("  Avg longest run:      %.1f seasons", stats["avg_max_run"])
+        logger.info("  Teams: %s", ", ".join(stats["members"]))
+
+    logger.info("\n\n" + "=" * 60)
+    logger.info("CLUB-LEVEL TABLE (for blog)")
+    logger.info("=" * 60)
+    logger.info("%-28s %7s %6s %7s  %s", "Team", "Seasons", "Stints", "Current", "Cluster Label")
+    logger.info("-" * 70)
+    for record in sorted(records, key=lambda x: (-x["n_seasons"], x["team"])):
+        cluster_id = record["cluster"]
+        cluster_label = cluster_stats[cluster_id]["label"]
+        current = "yes" if record["currently_in"] else "no"
+        logger.info("%-28s %7d %6d %7s  %s",
+                    record["team"], record["n_seasons"], record["stints"],
+                    current, cluster_label)
+
+
+if __name__ == "__main__":
+    main()

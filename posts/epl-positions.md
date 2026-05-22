@@ -80,7 +80,7 @@ The visual patterns in the chart suggested a taxonomy. I ran a k-means cluster a
 
 **Yo-yo regulars (16 clubs).** West Ham, Crystal Palace, Burnley, Sunderland, Leicester, Leeds, Fulham, Wolves, Nottingham Forest, and others. These clubs average 14.9 seasons played across multiple stints — half still in the league, half not. Their lines in the chart are interrupted, broken, then resumed. Leicester won the title in one of their stints. Sunderland is back in 2025/26 after years away. The cluster with the most drama per season.
 
-**Departed (16 clubs).** Blackburn, Bolton, Coventry, Portsmouth, Wimbledon, Sheffield Wednesday — clubs that averaged 6.6 seasons, mostly in a single stint, and are now gone. Blackburn won the league in 1995 on Jack Walker's money. Most of this group never came close to that again. Their lines end mid-chart and don't come back.
+**EPL tourists (16 clubs).** Blackburn, Bolton, Coventry, Portsmouth, Wimbledon, Sheffield Wednesday — clubs that averaged 6.6 seasons, mostly in a single stint, and are now gone. Blackburn won the league in 1995 on Jack Walker's money. Most of this group never came close to that again. Their lines end mid-chart and don't come back.
 
 **Modern era entrants (11 clubs).** Brentford, Brighton, Bournemouth, Stoke, Swansea, Hull — clubs whose EPL careers began after 2011. Most came briefly and left. Brighton is the outlier: nine consecutive seasons and still going.
 
