@@ -120,7 +120,7 @@ def assign_labels(stats: dict[int, dict]) -> dict[int, tuple[str, str, str]]:
     COLORS = ["#F59E0B", "#3B82F6", "#8B5CF6", "#6B7280"]
     DESCS  = ["Present every season, or close to it",
               "Multiple stints — half still in the league, half not",
-              "Post-2011 arrivals; most came briefly and left",
+              "Single-stint mid-table clubs; most are now gone",
               "Played their seasons and are now gone"]
 
     remaining = set(stats.keys())
