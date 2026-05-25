@@ -1,0 +1,177 @@
+"""Build the self-contained HTML for the cluster sparkline grid."""
+
+
+def build_html(js_data: str, n_epl_seasons: int) -> str:
+    """Return trajectories.html content."""
+    return f"""<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>EPL Club Trajectories — Four Clusters</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@900&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<script src="https://d3js.org/d3.v7.min.js"></script>
+<style>
+*,*::before,*::after{{box-sizing:border-box;margin:0;padding:0}}
+:root{{
+  --bg:#07090d;--surface:#0d1117;--border:#21262d;
+  --text:#c9d1d9;--muted:#6e7681;
+}}
+body{{
+  background:var(--bg);color:var(--text);
+  font-family:'IBM Plex Mono',monospace;
+  max-width:1200px;margin:0 auto;padding:32px 24px 60px;
+}}
+h1{{
+  font-family:'Playfair Display',serif;font-size:clamp(22px,3vw,40px);
+  font-weight:900;color:#f0f4f8;letter-spacing:-.02em;margin-bottom:6px;
+}}
+.subtitle{{
+  font-size:11px;color:var(--muted);letter-spacing:.09em;
+  text-transform:uppercase;margin-bottom:36px;
+}}
+.grid{{display:grid;grid-template-columns:repeat(auto-fit,minmax(520px,1fr));gap:28px;}}
+.panel{{
+  background:var(--surface);border:1px solid var(--border);
+  border-radius:10px;padding:20px 22px 24px;
+}}
+.panel-header{{
+  display:flex;align-items:baseline;gap:10px;margin-bottom:4px;
+  padding-bottom:12px;border-bottom:1px solid var(--border);
+}}
+.panel-title{{
+  font-size:14px;font-weight:600;color:#f0f4f8;
+}}
+.panel-count{{font-size:11px;color:var(--muted);}}
+.panel-desc{{font-size:10px;color:var(--muted);margin-bottom:16px;margin-top:4px;letter-spacing:.03em;}}
+.club-row{{
+  display:flex;align-items:center;gap:10px;
+  padding:3px 0;border-bottom:1px solid #ffffff06;
+}}
+.club-row:last-child{{border-bottom:none;}}
+.club-name{{
+  width:180px;flex-shrink:0;font-size:10px;
+  color:#c9d1d9;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;
+}}
+.club-meta{{
+  width:60px;flex-shrink:0;font-size:9px;
+  color:var(--muted);text-align:right;
+}}
+.spark-wrap{{flex:1;overflow:hidden;}}
+.spark-wrap svg{{display:block;width:100%;}}
+.season-axis{{
+  display:flex;justify-content:space-between;
+  font-size:8px;color:#333;margin-top:8px;padding:0 0 0 190px;
+}}
+footer{{
+  margin-top:48px;font-size:10px;color:#484f58;
+  border-top:1px solid var(--border);padding-top:16px;
+  line-height:1.9;
+}}
+footer a{{color:#58a6ff;text-decoration:none;}}
+</style>
+</head>
+<body>
+<h1>Four EPL Club Trajectories</h1>
+<p class="subtitle">k-means clustering · {n_epl_seasons} EPL seasons · 1 First Division (1991/92) · 7 features</p>
+<div class="grid" id="grid"></div>
+<footer>
+  k-means (k=4) on: seasons played, first appearance, currently in league, stints, longest run, avg position, best finish.<br>
+  Position data from football-data.co.uk and jalapic/engsoccerdata.<br>
+  <a href="https://github.com/kpolimis/epl-standings" target="_blank">github.com/kpolimis/epl-standings</a>
+  · <a href="index.html">← back to full chart</a>
+</footer>
+<script>
+const DATA = {js_data};
+const seasons = DATA.seasons;
+const N = seasons.length;
+const SPARK_W = 300, SPARK_H = 36, PAD = 2;
+const xSc = d3.scalePoint().domain(d3.range(N)).range([0, SPARK_W]).padding(0);
+const ySc = d3.scaleLinear().domain([1, 22]).range([PAD, SPARK_H - PAD]);
+const lineGen = d3.line()
+  .defined(d => d !== null)
+  .x((_, i) => xSc(i))
+  .y(d => ySc(d))
+  .curve(d3.curveCatmullRom.alpha(.5));
+
+DATA.clusters.forEach(cluster => {{
+  const panel = document.createElement("div");
+  panel.className = "panel";
+  panel.innerHTML = `
+    <div class="panel-header">
+      <span class="panel-title" style="color:${{cluster.color}}">${{cluster.label}}</span>
+      <span class="panel-count">${{cluster.n}} clubs</span>
+    </div>
+    <div class="panel-desc">${{cluster.desc}}</div>
+  `;
+
+  cluster.teams.forEach(team => {{
+    const row = document.createElement("div");
+    row.className = "club-row";
+
+    const nameEl = document.createElement("div");
+    nameEl.className = "club-name";
+    nameEl.title = team.name;
+    nameEl.textContent = team.name;
+
+    const metaEl = document.createElement("div");
+    metaEl.className = "club-meta";
+    const badge = team.currently_in ? "●" : "○";
+    metaEl.innerHTML = `${{team.n_seasons}}y&nbsp;<span title="stints" style="color:#444">${{team.stints}}×</span>&nbsp;<span style="color:${{team.currently_in ? cluster.color : "#333"}}">${{badge}}</span>`;
+
+    const sparkWrap = document.createElement("div");
+    sparkWrap.className = "spark-wrap";
+
+    const svg = d3.create("svg")
+      .attr("viewBox", `0 0 ${{SPARK_W}} ${{SPARK_H}}`)
+      .attr("height", SPARK_H);
+
+    for (let i = 0; i < N; i += 5) {{
+      svg.append("line")
+        .attr("x1", xSc(i)).attr("x2", xSc(i))
+        .attr("y1", 0).attr("y2", SPARK_H)
+        .attr("stroke", "#ffffff08").attr("stroke-width", 1);
+    }}
+
+    svg.append("line")
+      .attr("x1", 0).attr("x2", SPARK_W)
+      .attr("y1", ySc(10)).attr("y2", ySc(10))
+      .attr("stroke", "#ffffff06").attr("stroke-width", 0.5);
+
+    svg.append("rect")
+      .attr("x", 0).attr("width", SPARK_W)
+      .attr("y", ySc(17.5)).attr("height", ySc(22) - ySc(17.5))
+      .attr("fill", "#ff000010");
+
+    const pos = team.pos;
+    svg.append("path")
+      .datum(pos)
+      .attr("fill", "none")
+      .attr("stroke", cluster.color)
+      .attr("stroke-width", 1.4)
+      .attr("opacity", 0.85)
+      .attr("d", lineGen);
+
+    const lastIdx = pos.reduce((acc, p, i) => p !== null ? i : acc, -1);
+    if (lastIdx >= 0) {{
+      const isEnd = lastIdx === N - 1;
+      svg.append("circle")
+        .attr("cx", xSc(lastIdx))
+        .attr("cy", ySc(pos[lastIdx]))
+        .attr("r", isEnd ? 3.5 : 2.5)
+        .attr("fill", isEnd ? cluster.color : "#555")
+        .attr("stroke", "none");
+    }}
+
+    sparkWrap.appendChild(svg.node());
+    row.appendChild(nameEl);
+    row.appendChild(sparkWrap);
+    row.appendChild(metaEl);
+    panel.appendChild(row);
+  }});
+
+  document.getElementById("grid").appendChild(panel);
+}});
+</script>
+</body>
+</html>"""
