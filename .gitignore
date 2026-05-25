@@ -3,6 +3,9 @@
 .AppleDouble
 .LSOverride
 
+# Fetched URL cache (regenerable; large)
+data/cache/
+
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[codz]
