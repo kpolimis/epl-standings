@@ -1,12 +1,12 @@
 # EPL League Positions — 1991/92 to 2025/26
 
-An interactive bump chart tracking every club's finishing position across all 35 Premier League seasons, plus a k-means cluster analysis grouping the 52 clubs by trajectory type.
+An interactive bump chart tracking every club's finishing position across all 34 English Premier League (EPL) seasons. In total, 35 seasons are shown with the last season of the First Division that preceded the EPL's formation used as the chart's point. Additionally, there is a k-means cluster analysis grouping the 52 clubs by trajectory type. 
 
 **[→ View the chart](https://kpolimis.github.io/epl-standings/)**
 **[→ View the cluster trajectories](https://kpolimis.github.io/epl-standings/trajectories.html)**
 **[→ Blog post](https://kivanpolimis.com/posts/blog/epl-standings/)** · **[→ Technical tutorial](https://kivanpolimis.com/posts/technical/epl-clustering-tutorial/)**
 
-![Arsenal's EPL trajectory — 35 seasons highlighted](arsenal-trajectory.png)
+![Arsenal's EPL trajectory — 34 seasons highlighted](arsenal-trajectory.png)
 
 ![Four EPL Club Trajectories — k-means cluster visualization](trajectories-header.png)
 
@@ -16,7 +16,7 @@ An interactive bump chart tracking every club's finishing position across all 35
 
 ## What it shows
 
-- Every club that has played in the Premier League (52 clubs across 35 seasons)
+- Every club that has played in the Premier League (52 clubs across 34 seasons)
 - Highlighted clubs rendered in their club colours with crests
 - Relegation zone (bottom 3) and European qualification zones shaded
 - Hover any line to see that club's full history: seasons played, titles, best and worst finish
@@ -39,7 +39,7 @@ An interactive bump chart tracking every club's finishing position across all 35
 ```bash
 git clone https://github.com/kpolimis/epl-standings
 cd epl-standings
-pip install -r requirements.txt      # numpy, scikit-learn (cluster scripts only)
+pip install -r requirements.txt     # numpy, scikit-learn, matplotlib, pytest
 
 python fetch_standings.py           # fetch verified standings → data/standings_verified.json
 python generate.py                  # build chart → index.html
@@ -48,7 +48,7 @@ python generate_trajectories.py     # build cluster viz → trajectories.html
 open index.html
 ```
 
-`generate.py` and `fetch_standings.py` use only the standard library. `requirements.txt` is only needed for the two cluster scripts.
+`generate.py` and `fetch_standings.py` use only the standard library. `requirements.txt` covers the cluster scripts, `elbow_analysis.py` (matplotlib), and the test suite (pytest).
 
 ## File structure
 

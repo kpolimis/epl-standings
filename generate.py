@@ -1,6 +1,6 @@
 """EPL League Positions — Animated Chart Generator.
 
-Run: python3 generate.py  →  index.html
+Run: python generate.py  →  index.html
 
 Requires data/standings_verified.json — run fetch_standings.py first.
 """
@@ -18,7 +18,7 @@ logger = logging.getLogger(__name__)
 _VERIFIED_PATH = "data/standings_verified.json"
 if not os.path.exists(_VERIFIED_PATH):
     logger.error(f"{_VERIFIED_PATH} not found.")
-    logger.error("Run: python3 fetch_standings.py  to fetch verified data first.")
+    logger.error("Run: python fetch_standings.py  to fetch verified data first.")
     sys.exit(1)
 
 with open(_VERIFIED_PATH) as _f:

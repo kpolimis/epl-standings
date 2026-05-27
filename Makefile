@@ -18,7 +18,7 @@ refresh:  ## Re-fetch all sources, ignoring cache
 
 html: index.html  ## Generate the bump chart (index.html)
 
-index.html: generate.py html_template.py team_config.py data/standings_verified.json
+index.html data/standings.json: generate.py html_template.py team_config.py data/standings_verified.json
 	python generate.py
 
 trajectories: trajectories.html  ## Generate the cluster sparkline chart
