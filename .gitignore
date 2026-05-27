@@ -1,3 +1,7 @@
+# Docs (local only — tracked via docs/.gitignore)
+docs/*
+!docs/.gitignore
+
 # macOS
 .DS_Store
 .AppleDouble
